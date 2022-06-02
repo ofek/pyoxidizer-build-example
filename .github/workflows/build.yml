@@ -76,7 +76,7 @@ jobs:
 
     - if: runner.os != 'Windows'
       name: Strip binary
-      run: strip app/build/${{ matrix.target }}/release/exe/devenv
+      run: strip app/build/${{ matrix.target }}/release/exe/pyapp
 
     - name: Setup artifact directory
       run: |
