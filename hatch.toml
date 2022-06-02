@@ -1,0 +1,17 @@
+[envs.build]
+detached = true
+dependencies = [
+  "pyoxidizer>=0.20.0",
+]
+
+[envs.build.env-vars]
+FLAVOR = "standalone_static"
+
+[envs.build.overrides]
+platform.macos.env-vars = [
+  { key = "FLAVOR", value = "standalone_dynamic" },
+]
+
+[envs.build.scripts]
+debug = "pyoxidizer build exe --path app --var-env flavor FLAVOR {args}"
+release = "debug --release"

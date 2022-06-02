@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyapp"
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+dynamic = ["version"]
+
+[tool.hatch.version]
+path = "src/pyapp/__about__.py"
+
+[project.scripts]
+pyapp = "pyapp.cli:main"

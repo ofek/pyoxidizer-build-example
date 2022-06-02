@@ -1,0 +1,89 @@
+name: build
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUNBUFFERED: "1"
+  FORCE_COLOR: "1"
+  PYTHON_VERSION: "3.10"
+  PIP_FIND_LINKS: wheels
+
+jobs:
+  exe:
+    name: Build standalone executable for ${{ matrix.target == 'aarch64-apple-darwin' && 'macOS M1' || startsWith(matrix.os, 'macos-') && 'macOS Intel' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-20.04
+          target: x86_64-unknown-linux-musl
+        - os: windows-2022
+          target: x86_64-pc-windows-msvc
+        - os: macos-10.15
+          target: x86_64-apple-darwin
+        - os: macos-11
+          target: aarch64-apple-darwin
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Download latest artifacts
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        repo: indygreg/PyOxidizer
+        workflow: release.yml
+        name: pyoxidizer-wheels
+        path: ${{ env.PIP_FIND_LINKS }}
+        branch: main
+        # Optional, instead of branch
+        # run_id: 123456789
+
+    - name: Install Hatch
+      run: |
+        python -m pip install -q --upgrade hatch
+        hatch --version
+
+    - if: matrix.target == 'x86_64-unknown-linux-musl'
+      name: Install musl
+      run: |
+        sudo apt update
+        sudo apt install -y --no-install-recommends musl-tools
+
+    - if: runner.os != 'Windows'
+      name: Install Rust target
+      run: rustup target add ${{ matrix.target }}
+
+    - name: Build executable
+      run: hatch -v run build:release --target-triple ${{ matrix.target }}
+
+    - if: runner.os != 'Windows'
+      name: Strip binary
+      run: strip app/build/${{ matrix.target }}/release/exe/devenv
+
+    - name: Setup artifact directory
+      run: |
+        mv app/build/${{ matrix.target }}/release targets
+        mv targets/exe targets/${{ matrix.target }}
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: artifacts
+        path: targets
+        if-no-files-found: error
