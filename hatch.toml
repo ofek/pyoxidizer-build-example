@@ -1,7 +1,7 @@
 [envs.build]
 detached = true
 dependencies = [
-  "pyoxidizer>=0.20.0",
+  "pyoxidizer==0.20.0",
 ]
 
 [envs.build.env-vars]
