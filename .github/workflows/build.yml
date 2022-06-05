@@ -16,7 +16,7 @@ env:
   PYTHONUNBUFFERED: "1"
   FORCE_COLOR: "1"
   PYTHON_VERSION: "3.10"
-  PIP_FIND_LINKS: wheels
+  # PIP_FIND_LINKS: wheels
 
 jobs:
   exe:
@@ -43,17 +43,17 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Download latest artifacts
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        repo: indygreg/PyOxidizer
-        workflow: release.yml
-        name: pyoxidizer-wheels
-        path: ${{ env.PIP_FIND_LINKS }}
-        branch: main
-        # Optional, instead of branch
-        # run_id: 123456789
+    # - name: Download latest artifacts
+    #   uses: dawidd6/action-download-artifact@v2
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     repo: indygreg/PyOxidizer
+    #     workflow: release.yml
+    #     name: pyoxidizer-wheels
+    #     path: ${{ env.PIP_FIND_LINKS }}
+    #     branch: main
+    #     # Optional, instead of branch
+    #     # run_id: 123456789
 
     - name: Install Hatch
       run: |
