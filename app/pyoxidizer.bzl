@@ -14,7 +14,7 @@ def make_exe():
         packaging_policy=policy,
         config=python_config,
     )
-    exe.add_python_resources(exe.pip_install(["."]))
+    exe.add_python_resources(exe.pip_download(["."]))
 
     return exe
 
